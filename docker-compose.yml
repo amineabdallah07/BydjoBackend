@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: bydjo-db
+    environment:
+      POSTGRES_DB: bydjo_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bydjo-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/bydjo_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_PROFILES_ACTIVE: prod
+      JWT_SECRET: byDjoSecretKeyForJwtTokenGenerationMustBeLongEnough2024PremiumBoutique
+      TWILIO_ENABLED: false
+      UPLOAD_DIR: /app/uploads
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - upload_data:/app/uploads
+
+  # Angular Frontend (served by Nginx)
+  frontend:
+    build:
+      context: ../bydjo-frontend
+      dockerfile: Dockerfile
+    container_name: bydjo-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  upload_data:
