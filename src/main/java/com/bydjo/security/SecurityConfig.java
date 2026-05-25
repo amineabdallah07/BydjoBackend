@@ -73,7 +73,8 @@ public CorsConfigurationSource corsConfigurationSource() {
     configuration.setAllowedOrigins(List.of(
         "http://localhost:4200",
         "http://localhost:3000",
-        "https://by-djo-frontend.vercel.app"
+        "https://by-djo-frontend.vercel.app",
+        "https://bydjofrontend-production.up.railway.app"
     ));
 
     configuration.setAllowedMethods(Arrays.asList(
