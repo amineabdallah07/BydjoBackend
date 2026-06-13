@@ -76,6 +76,10 @@ app:
   firebase:
     service-account-json: ${FIREBASE_SERVICE_ACCOUNT_JSON}
 
+  sendzen:
+    api-key: ${SENDZEN_API_KEY}
+    from-number: ${SENDZEN_FROM_NUMBER}
+
   upload:
     dir: ${UPLOAD_DIR:./uploads}
     max-size: 10485760
