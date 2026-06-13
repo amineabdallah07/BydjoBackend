@@ -41,7 +41,7 @@ public class FirebaseService {
     public String verifyAndGetPhone(String idToken) {
         try {
             FirebaseToken decoded = FirebaseAuth.getInstance().verifyIdToken(idToken);
-            String phone = decoded.getPhoneNumber();
+            String phone = (String) decoded.getClaims().get("phone_number");
             if (phone == null) {
                 throw new RuntimeException("Firebase token does not contain a phone number");
             }
