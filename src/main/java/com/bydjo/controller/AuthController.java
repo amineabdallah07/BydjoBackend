@@ -39,6 +39,12 @@ public class AuthController {
         return ResponseEntity.ok(authService.verifyOtpAndLogin(request));
     }
 
+    @PostMapping("/firebase")
+    @Operation(summary = "Login with Firebase ID token")
+    public ResponseEntity<ApiResponse<AuthResponseDto>> firebaseLogin(@Valid @RequestBody FirebaseLoginDto request) {
+        return ResponseEntity.ok(authService.firebaseLogin(request.getIdToken()));
+    }
+
     @PostMapping("/register")
     @Operation(summary = "Register new account")
     public ResponseEntity<ApiResponse<AuthResponseDto>> register(

@@ -30,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final OtpService otpService;
+    private final FirebaseService firebaseService;
     private final JwtTokenProvider tokenProvider;
 
     @Override
@@ -83,6 +84,50 @@ public class AuthServiceImpl implements AuthService {
         AuthResponseDto response = new AuthResponseDto(
                 accessToken,
                 refreshToken,
+                tokenProvider.getExpirationMillis(),
+                mapToUserDto(user)
+        );
+
+        return ApiResponse.success("Login successful", response);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<AuthResponseDto> firebaseLogin(String idToken) {
+        String phone = firebaseService.verifyAndGetPhone(idToken);
+
+        User user = userRepository.findByPhone(phone)
+                .orElseGet(() -> {
+                    User newUser = User.builder()
+                            .phone(phone)
+                            .firstName("")
+                            .lastName("")
+                            .phoneVerified(true)
+                            .active(true)
+                            .roles(new HashSet<>())
+                            .build();
+
+                    Role customerRole = roleRepository.findByName(RoleName.CUSTOMER)
+                            .orElseThrow(() -> new RuntimeException("Customer role not found"));
+                    newUser.getRoles().add(customerRole);
+
+                    return userRepository.save(newUser);
+                });
+
+        if (!user.getPhoneVerified()) {
+            user.setPhoneVerified(true);
+            userRepository.save(user);
+        }
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userPrincipal, null, userPrincipal.getAuthorities());
+
+        String accessToken = tokenProvider.generateAccessToken(authentication);
+        String refreshToken = tokenProvider.generateRefreshToken(user.getId());
+
+        AuthResponseDto response = new AuthResponseDto(
+                accessToken, refreshToken,
                 tokenProvider.getExpirationMillis(),
                 mapToUserDto(user)
         );

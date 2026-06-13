@@ -73,11 +73,8 @@ app:
     max-attempts: 3
     resend-cooldown-seconds: 60
 
-  twilio:
-    account-sid: ${TWILIO_ACCOUNT_SID:your-account-sid}
-    auth-token: ${TWILIO_AUTH_TOKEN:your-auth-token}
-    phone-number: ${TWILIO_PHONE_NUMBER:+1234567890}
-    enabled: ${TWILIO_ENABLED:false}
+  firebase:
+    service-account-json: ${FIREBASE_SERVICE_ACCOUNT_JSON}
 
   upload:
     dir: ${UPLOAD_DIR:./uploads}
