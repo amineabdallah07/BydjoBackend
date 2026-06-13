@@ -34,8 +34,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ApiResponse<String> sendOtp(OtpRequestDto request) {
-        otpService.sendOtp(request.getPhone());
-        return ApiResponse.success("OTP sent successfully to " + request.getPhone());
+        String code = otpService.sendOtp(request.getPhone());
+        return ApiResponse.success("OTP sent successfully to " + request.getPhone(), code);
     }
 
     @Override

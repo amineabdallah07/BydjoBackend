@@ -37,7 +37,7 @@ public class OtpServiceImpl implements OtpService {
 
     @Override
     @Transactional
-    public void sendOtp(String phone) {
+    public String sendOtp(String phone) {
         // Check for existing unexpired OTP
         var existingOtp = otpCodeRepository.findTopByPhoneAndVerifiedFalseOrderByCreatedAtDesc(phone);
         if (existingOtp.isPresent()) {
@@ -70,8 +70,9 @@ public class OtpServiceImpl implements OtpService {
             smsService.sendSms(phone, message);
         } else {
             // Development mode: log the OTP
-            log.info("====== OTP for {} : {} ======", phone, code);
-        }
+        log.info("====== OTP for {} : {} ======", phone, code);
+        return code;
+    }
     }
 
     @Override
