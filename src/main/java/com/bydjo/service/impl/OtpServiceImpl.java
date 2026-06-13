@@ -30,15 +30,11 @@ public class OtpServiceImpl implements OtpService {
     @Value("${app.otp.max-attempts:3}")
     private int maxAttempts;
 
-    @Value("${app.twilio.enabled:false}")
-    private boolean twilioEnabled;
-
     private final SecureRandom random = new SecureRandom();
 
     @Override
     @Transactional
     public String sendOtp(String phone) {
-        // Check for existing unexpired OTP
         var existingOtp = otpCodeRepository.findTopByPhoneAndVerifiedFalseOrderByCreatedAtDesc(phone);
         if (existingOtp.isPresent()) {
             OtpCode otp = existingOtp.get();
@@ -50,7 +46,6 @@ public class OtpServiceImpl implements OtpService {
             }
         }
 
-        // Generate new OTP
         String code = generateOtpCode();
 
         OtpCode otpCode = OtpCode.builder()
@@ -63,16 +58,9 @@ public class OtpServiceImpl implements OtpService {
 
         otpCodeRepository.save(otpCode);
 
-        // Send SMS
         String message = String.format("BY DJO - Your verification code is: %s. Valid for %d minutes.", code, expirationMinutes);
-
-        if (twilioEnabled) {
-            smsService.sendSms(phone, message);
-        } else {
-            // Development mode: log the OTP
-        log.info("====== OTP for {} : {} ======", phone, code);
+        smsService.sendSms(phone, message);
         return code;
-    }
     }
 
     @Override
