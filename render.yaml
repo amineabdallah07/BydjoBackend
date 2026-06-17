@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: bydjo-backend
+    runtime: image
+    repo: https://github.com/YOUR_USERNAME/YOUR_REPO
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/actuator/health
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: DB_URL
+        fromDatabase:
+          name: bydjo-db
+          property: connectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: bydjo-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: bydjo-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SENDZEN_API_KEY
+        sync: false
+      - key: SENDZEN_FROM_NUMBER
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://bydjo-store.vercel.app
+      - key: UPLOAD_DIR
+        value: /data/uploads
+
+databases:
+  - name: bydjo-db
+    plan: free
+    databaseName: bydjo_db
+    postgresMajorVersion: 16

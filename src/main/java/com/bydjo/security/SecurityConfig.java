@@ -75,12 +75,15 @@ public class SecurityConfig {
 public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
 
-    configuration.setAllowedOrigins(List.of(
+    String envOrigins = System.getenv("CORS_ALLOWED_ORIGINS");
+    List<String> allowedOrigins = new java.util.ArrayList<>(List.of(
         "http://localhost:4200",
-        "http://localhost:3000",
-        "https://by-djo-frontend.vercel.app",
-        "http://localhost:4200"
+        "http://localhost:3000"
     ));
+    if (envOrigins != null && !envOrigins.isBlank()) {
+        allowedOrigins.addAll(Arrays.asList(envOrigins.split(",")));
+    }
+    configuration.setAllowedOrigins(allowedOrigins);
 
     configuration.setAllowedMethods(Arrays.asList(
         "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
