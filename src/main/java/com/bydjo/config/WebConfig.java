@@ -12,7 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${app.upload.dir:./uploads}")
     private String uploadDir;
 
-    @Value("${app.cors.allowed-origins:http://localhost:4200,http://localhost:3000}")
+    @Value("${app.cors.allowed-origins:http://localhost:4200,http://localhost:3000,https://khlayelstore.vercel.app}")
     private String allowedOrigins;
 
     @Override
