@@ -1,11 +1,8 @@
 services:
   - type: web
     name: bydjo-backend
-    runtime: image
-    repo: https://github.com/YOUR_USERNAME/YOUR_REPO
-    plan: free
+    runtime: docker
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /api/actuator/health
     envVars:
       - key: PORT
         value: 8080
@@ -22,7 +19,7 @@ services:
           name: bydjo-db
           property: password
       - key: JWT_SECRET
-        generateValue: true
+        sync: false
       - key: SENDZEN_API_KEY
         sync: false
       - key: SENDZEN_FROM_NUMBER
