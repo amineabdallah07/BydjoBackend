@@ -77,6 +77,8 @@ app:
     api-key: ${SENDZEN_API_KEY}
     from-number: ${SENDZEN_FROM_NUMBER}
 
+  frontend-url: ${FRONTEND_URL:http://localhost:4200}
+
   upload:
     dir: ${UPLOAD_DIR:./uploads}
     max-size: 10485760

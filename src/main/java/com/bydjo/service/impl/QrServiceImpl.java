@@ -13,6 +13,7 @@ import com.bydjo.repository.QrOrderItemRepository;
 import com.bydjo.service.QrService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,9 @@ public class QrServiceImpl implements QrService {
     private final QrOrderItemRepository qrOrderItemRepository;
     private final OrderItemRepository orderItemRepository;
     private final QrCodeRepository qrCodeRepository;
+
+    @Value("${app.frontend-url:http://localhost:4200}")
+    private String frontendUrl;
 
     @Override
     @Transactional
@@ -180,7 +184,7 @@ public class QrServiceImpl implements QrService {
             return url;
         }
         // PHOTO, FREE, or not found: Angular page handles display/error
-        return "http://localhost:4200/qr/" + qrCode;
+        return frontendUrl + "/qr/" + qrCode;
     }
 
     private QrCodeDto mapQrCodeToDto(QrCode entity) {

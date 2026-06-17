@@ -12,10 +12,13 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${app.upload.dir:./uploads}")
     private String uploadDir;
 
+    @Value("${app.cors.allowed-origins:http://localhost:4200,http://localhost:3000}")
+    private String allowedOrigins;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:4200", "http://localhost:3000")
+                .allowedOrigins(allowedOrigins.split(","))
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
