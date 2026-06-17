@@ -136,6 +136,7 @@ public class ProductServiceImpl implements ProductService {
                 .isNew(dto.getIsNew())
                 .bestseller(dto.getBestseller())
                 .flashSale(dto.getFlashSale())
+                .isQrProduct(dto.getIsQrProduct() != null && dto.getIsQrProduct())
                 .discountPercentage(dto.getDiscountPercentage())
                 .flashSaleEndsAt(dto.getFlashSaleEndsAt())
                 .material(dto.getMaterial())
@@ -206,6 +207,7 @@ public class ProductServiceImpl implements ProductService {
         product.setIsNew(dto.getIsNew());
         product.setBestseller(dto.getBestseller());
         product.setFlashSale(dto.getFlashSale());
+        product.setIsQrProduct(dto.getIsQrProduct() != null && dto.getIsQrProduct());
         product.setDiscountPercentage(dto.getDiscountPercentage());
         product.setFlashSaleEndsAt(dto.getFlashSaleEndsAt());
         product.setMaterial(dto.getMaterial());
@@ -315,6 +317,7 @@ public class ProductServiceImpl implements ProductService {
                 .isNew(p.getIsNew())
                 .bestseller(p.getBestseller())
                 .flashSale(p.getFlashSale())
+                .isQrProduct(p.getIsQrProduct())
                 .discountPercentage(p.getDiscountPercentage())
                 .flashSaleEndsAt(p.getFlashSaleEndsAt())
                 .material(p.getMaterial())

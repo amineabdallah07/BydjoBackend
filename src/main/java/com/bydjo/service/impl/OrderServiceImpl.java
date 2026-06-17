@@ -4,7 +4,9 @@ import com.bydjo.dtos.common.PagedResponse;
 import com.bydjo.dtos.order.CreateOrderDto;
 import com.bydjo.dtos.order.OrderDto;
 import com.bydjo.dtos.order.OrderItemDto;
+import com.bydjo.dtos.qr.QrDataDto;
 import com.bydjo.entity.*;
+import com.bydjo.service.QrService;
 import com.bydjo.enums.OrderStatus;
 import com.bydjo.enums.PaymentMethod;
 import com.bydjo.exceptions.ResourceNotFoundException;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,6 +40,9 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CouponRepository couponRepository;
+    private final QrService qrService;
+    private final QrOrderItemRepository qrOrderItemRepository;
+    private final QrCodeRepository qrCodeRepository;
     // FIX L4: Delivery fees from DB settings
     private final AppSettingService appSettingService;
 
@@ -109,6 +115,9 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order = orderRepository.save(order);
+
+        // Handle QR items
+        handleQrItems(order, dto.getQrItems());
 
         // Clear cart
         cart.getItems().clear();
@@ -186,10 +195,27 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order = orderRepository.save(order);
+
+        // Handle QR items
+        handleQrItems(order, dto.getQrItems());
+
         cart.getItems().clear();
         cartRepository.save(cart);
 
         return mapToDto(order);
+    }
+
+    private void handleQrItems(Order order, List<QrDataDto> qrItems) {
+        if (qrItems == null || qrItems.isEmpty()) return;
+
+        for (OrderItem item : order.getItems()) {
+            if (item.getProduct() != null && Boolean.TRUE.equals(item.getProduct().getIsQrProduct())) {
+                qrItems.stream()
+                        .filter(q -> q.getProductId() != null && q.getProductId().equals(item.getProduct().getId()))
+                        .findFirst()
+                        .ifPresent(qrData -> qrService.createQrOrderItem(item.getId(), qrData.getQrType(), qrData.getContent()));
+            }
+        }
     }
 
     @Override
@@ -296,6 +322,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.setStatus(OrderStatus.CANCELLED);
         order.setCancelledAt(LocalDateTime.now());
+        releaseQrCodes(order);
         return mapToDto(orderRepository.save(order));
     }
 
@@ -304,7 +331,28 @@ public class OrderServiceImpl implements OrderService {
     public void deleteOrder(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", "id", id));
+        releaseQrCodes(order);
         orderRepository.delete(order);
+    }
+
+    private void releaseQrCodes(Order order) {
+        for (OrderItem item : order.getItems()) {
+            List<com.bydjo.entity.QrOrderItem> qrItems = qrOrderItemRepository.findByOrderItemId(item.getId());
+            for (com.bydjo.entity.QrOrderItem qrItem : qrItems) {
+                qrCodeRepository.findByCode(qrItem.getQrCode()).ifPresent(qrCode -> {
+                    qrCode.setStatus("FREE");
+                    qrCode.setAssignedAt(null);
+                    qrCode.setCustomerName(null);
+                    qrCode.setProductName(null);
+                    qrCode.setOrderNumber(null);
+                    qrCode.setQrType(null);
+                    qrCode.setContent(null);
+                    qrCodeRepository.save(qrCode);
+                    log.info("Released QR code #{} for cancelled/deleted order {}", qrCode.getId(), order.getOrderNumber());
+                });
+                qrOrderItemRepository.delete(qrItem);
+            }
+        }
     }
 
     @Override
@@ -390,6 +438,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private OrderItemDto mapItemToDto(OrderItem i) {
+        String qrCode = null;
+        String qrType = null;
+        var qrOpt = qrOrderItemRepository.findByOrderItemId(i.getId());
+        if (!qrOpt.isEmpty()) {
+            var qr = qrOpt.get(0);
+            qrCode = qr.getQrCode();
+            qrType = qr.getQrType();
+        }
+
         return OrderItemDto.builder()
                 .id(i.getId())
                 .productId(i.getProduct() != null ? i.getProduct().getId() : null)
@@ -400,6 +457,8 @@ public class OrderServiceImpl implements OrderService {
                 .unitPrice(i.getUnitPrice())
                 .totalPrice(i.getTotalPrice())
                 .productImage(i.getProductImage())
+                .qrCode(qrCode)
+                .qrType(qrType)
                 .build();
     }
 

@@ -48,6 +48,11 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/store/**").permitAll()
+                .requestMatchers("/tshirts/scan/**").permitAll()
+                .requestMatchers("/tshirts/**").authenticated()
+                .requestMatchers("/qr/orders/**").hasRole("ADMIN")
+                .requestMatchers("/qr/codes/**").hasRole("ADMIN")
+                .requestMatchers("/qr/**").permitAll()
                 // Admin endpoints
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 // Cart — accessible guests (sessionId) + logged-in users
@@ -74,7 +79,7 @@ public CorsConfigurationSource corsConfigurationSource() {
         "http://localhost:4200",
         "http://localhost:3000",
         "https://by-djo-frontend.vercel.app",
-        "https://bydjofrontend-production.up.railway.app"
+        "http://localhost:4200"
     ));
 
     configuration.setAllowedMethods(Arrays.asList(

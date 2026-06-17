@@ -13,7 +13,7 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/bydjo_db}
     username: ${DB_USERNAME:postgres}
     # FIX Bug #11: Password MUST come from environment variable — no hardcoded fallback
-    password: ${DB_PASSWORD}
+    password: ${DB_PASSWORD:midou@123}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
@@ -72,9 +72,6 @@ app:
     expiration-minutes: 5
     max-attempts: 3
     resend-cooldown-seconds: 60
-
-  firebase:
-    service-account-json: ${FIREBASE_SERVICE_ACCOUNT_JSON}
 
   sendzen:
     api-key: ${SENDZEN_API_KEY}

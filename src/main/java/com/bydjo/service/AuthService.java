@@ -6,7 +6,6 @@ import com.bydjo.dtos.common.ApiResponse;
 public interface AuthService {
     ApiResponse<String> sendOtp(OtpRequestDto request);
     ApiResponse<AuthResponseDto> verifyOtpAndLogin(OtpVerifyDto request);
-    ApiResponse<AuthResponseDto> firebaseLogin(String idToken);
     ApiResponse<AuthResponseDto> registerWithOtp(RegisterDto request, OtpVerifyDto otpRequest);
     ApiResponse<AuthResponseDto> refreshToken(RefreshTokenDto request);
     ApiResponse<UserDto> getCurrentUser(Long userId);

@@ -39,6 +39,7 @@ public class ProductCreateDto {
     private Integer discountPercentage = 0;
     private LocalDateTime flashSaleEndsAt;
     private String material;
+    private Boolean isQrProduct = false;
     private String tags;
     private Integer stock;
     private List<ProductVariantDto> variants;

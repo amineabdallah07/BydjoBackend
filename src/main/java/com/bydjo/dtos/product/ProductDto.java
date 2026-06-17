@@ -30,6 +30,7 @@ public class ProductDto {
     private Boolean isNew;
     private Boolean bestseller;
     private Boolean flashSale;
+    private Boolean isQrProduct;
     private Integer discountPercentage;
     private LocalDateTime flashSaleEndsAt;
     private String material;

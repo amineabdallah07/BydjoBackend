@@ -1,8 +1,10 @@
 package com.bydjo.dtos.order;
 
+import com.bydjo.dtos.qr.QrDataDto;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class CreateOrderDto {
@@ -30,4 +32,6 @@ public class CreateOrderDto {
     private String notes;
 
     private String sessionCartId;
+
+    private List<QrDataDto> qrItems;
 }

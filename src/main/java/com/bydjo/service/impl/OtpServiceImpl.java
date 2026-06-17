@@ -58,6 +58,8 @@ public class OtpServiceImpl implements OtpService {
 
         otpCodeRepository.save(otpCode);
 
+        log.info("OTP for {}: {}", phone, code);
+
         String message = String.format("BY DJO - Your verification code is: %s. Valid for %d minutes.", code, expirationMinutes);
         smsService.sendSms(phone, message);
         return code;

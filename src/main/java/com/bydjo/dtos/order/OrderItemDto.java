@@ -21,4 +21,6 @@ public class OrderItemDto {
     private BigDecimal unitPrice;
     private BigDecimal totalPrice;
     private String productImage;
+    private String qrCode;
+    private String qrType;
 }

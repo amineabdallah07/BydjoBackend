@@ -73,6 +73,10 @@ public class Product {
     @Builder.Default
     private Boolean flashSale = false;
 
+    @Column(name = "is_qr_product")
+    @Builder.Default
+    private Boolean isQrProduct = false;
+
     @Column(name = "discount_percentage")
     @Builder.Default
     private Integer discountPercentage = 0;
