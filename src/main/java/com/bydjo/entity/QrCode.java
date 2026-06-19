@@ -45,4 +45,7 @@ public class QrCode {
 
     @Column(columnDefinition = "TEXT")
     private String content;
+
+    @Column(length = 10)
+    private String size;
 }

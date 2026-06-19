@@ -59,11 +59,14 @@ public class QrController {
     @PostMapping("/codes/generate")
     @Operation(summary = "Generate empty QR codes (Admin)")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<QrCodeDto>>> generateQrCodes(@RequestParam(defaultValue = "50") int count) {
+    public ResponseEntity<ApiResponse<List<QrCodeDto>>> generateQrCodes(
+            @RequestParam(defaultValue = "50") int count,
+            @RequestParam(defaultValue = "") String size) {
         if (count < 1) count = 1;
         if (count > 1000) count = 1000;
-        List<QrCodeDto> codes = qrService.generateQrCodes(count);
-        return ResponseEntity.ok(ApiResponse.success("Generated " + count + " QR codes", codes));
+        String sz = (size == null || size.isBlank()) ? null : size.toUpperCase();
+        List<QrCodeDto> codes = qrService.generateQrCodes(count, sz);
+        return ResponseEntity.ok(ApiResponse.success("Generated " + count + " QR codes (size=" + sz + ")", codes));
     }
 
     @GetMapping("/codes")
@@ -76,7 +79,7 @@ public class QrController {
     @GetMapping("/codes/stats")
     @Operation(summary = "Get QR code stats (Admin)")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Map<String, Long>>> getQrCodeStats() {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getQrCodeStats() {
         return ResponseEntity.ok(qrService.getQrCodeStats());
     }
 

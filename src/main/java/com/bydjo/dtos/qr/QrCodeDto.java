@@ -22,4 +22,5 @@ public class QrCodeDto {
     private String orderNumber;
     private String qrType;
     private String content;
+    private String size;
 }

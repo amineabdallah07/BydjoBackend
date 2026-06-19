@@ -213,7 +213,7 @@ public class OrderServiceImpl implements OrderService {
                 qrItems.stream()
                         .filter(q -> q.getProductId() != null && q.getProductId().equals(item.getProduct().getId()))
                         .findFirst()
-                        .ifPresent(qrData -> qrService.createQrOrderItem(item.getId(), qrData.getQrType(), qrData.getContent()));
+                        .ifPresent(qrData -> qrService.createQrOrderItem(item.getId(), qrData.getQrType(), qrData.getContent(), item.getSizeName()));
             }
         }
     }

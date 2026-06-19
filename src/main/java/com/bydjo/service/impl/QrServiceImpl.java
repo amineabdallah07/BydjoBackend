@@ -38,9 +38,16 @@ public class QrServiceImpl implements QrService {
 
     @Override
     @Transactional
-    public QrOrderItemDto createQrOrderItem(Long orderItemId, String qrType, String content) {
-        // Find the next available FREE pre-generated QR code
-        QrCode freeCode = qrCodeRepository.findFirstByStatus("FREE").orElse(null);
+    public QrOrderItemDto createQrOrderItem(Long orderItemId, String qrType, String content, String size) {
+        String normalizedSize = size != null ? size.toUpperCase() : null;
+        // Find the next available FREE pre-generated QR code matching the size
+        QrCode freeCode = null;
+        if (normalizedSize != null) {
+            freeCode = qrCodeRepository.findFirstByStatusAndSize("FREE", normalizedSize).orElse(null);
+        }
+        if (freeCode == null) {
+            freeCode = qrCodeRepository.findFirstByStatus("FREE").orElse(null);
+        }
         String qrCode;
 
         if (freeCode != null) {
@@ -60,6 +67,9 @@ public class QrServiceImpl implements QrService {
                 freeCode.setOrderNumber(order != null ? order.getOrderNumber() : null);
                 freeCode.setQrType(qrType.toUpperCase());
                 freeCode.setContent(content);
+                if (freeCode.getSize() == null && normalizedSize != null) {
+                    freeCode.setSize(normalizedSize);
+                }
                 qrCodeRepository.save(freeCode);
                 log.info("Assigned pre-generated QR code {} to orderItemId={}", qrCode, orderItemId);
             } else {
@@ -68,6 +78,9 @@ public class QrServiceImpl implements QrService {
                 freeCode.setAssignedAt(LocalDateTime.now());
                 freeCode.setQrType(qrType.toUpperCase());
                 freeCode.setContent(content);
+                if (freeCode.getSize() == null && normalizedSize != null) {
+                    freeCode.setSize(normalizedSize);
+                }
                 qrCodeRepository.save(freeCode);
                 log.info("Assigned pre-generated QR code {} (no order details) to orderItemId={}", qrCode, orderItemId);
             }
@@ -123,15 +136,17 @@ public class QrServiceImpl implements QrService {
 
     @Override
     @Transactional
-    public List<QrCodeDto> generateQrCodes(int count) {
+    public List<QrCodeDto> generateQrCodes(int count, String size) {
+        String normalizedSize = size != null ? size.toUpperCase() : null;
         List<QrCode> codes = IntStream.range(0, count)
                 .mapToObj(i -> QrCode.builder()
                         .code(UUID.randomUUID().toString())
                         .status("FREE")
+                        .size(normalizedSize)
                         .build())
                 .collect(Collectors.toList());
         codes = qrCodeRepository.saveAll(codes);
-        log.info("Generated {} free QR codes", count);
+        log.info("Generated {} free QR codes (size={})", count, normalizedSize);
         return codes.stream().map(this::mapQrCodeToDto).collect(Collectors.toList());
     }
 
@@ -156,10 +171,26 @@ public class QrServiceImpl implements QrService {
 
     @Override
     @Transactional(readOnly = true)
-    public ApiResponse<Map<String, Long>> getQrCodeStats() {
+    public ApiResponse<Map<String, Object>> getQrCodeStats() {
         long free = qrCodeRepository.countByStatus("FREE");
         long assigned = qrCodeRepository.countByStatus("ASSIGNED");
-        return ApiResponse.success(Map.of("free", free, "assigned", assigned));
+        Map<String, Long> perSize = Map.of(
+                "S_free", qrCodeRepository.countByStatusAndSize("FREE", "S"),
+                "S_assigned", qrCodeRepository.countByStatusAndSize("ASSIGNED", "S"),
+                "M_free", qrCodeRepository.countByStatusAndSize("FREE", "M"),
+                "M_assigned", qrCodeRepository.countByStatusAndSize("ASSIGNED", "M"),
+                "L_free", qrCodeRepository.countByStatusAndSize("FREE", "L"),
+                "L_assigned", qrCodeRepository.countByStatusAndSize("ASSIGNED", "L"),
+                "XL_free", qrCodeRepository.countByStatusAndSize("FREE", "XL"),
+                "XL_assigned", qrCodeRepository.countByStatusAndSize("ASSIGNED", "XL"),
+                "unsized_free", qrCodeRepository.countByStatusAndSize("FREE", null),
+                "unsized_assigned", qrCodeRepository.countByStatusAndSize("ASSIGNED", null)
+        );
+        return ApiResponse.success(Map.of(
+                "free", free,
+                "assigned", assigned,
+                "perSize", perSize
+        ));
     }
 
     @Override
@@ -199,6 +230,7 @@ public class QrServiceImpl implements QrService {
                 .orderNumber(entity.getOrderNumber())
                 .qrType(entity.getQrType())
                 .content(entity.getContent())
+                .size(entity.getSize())
                 .build();
     }
 
