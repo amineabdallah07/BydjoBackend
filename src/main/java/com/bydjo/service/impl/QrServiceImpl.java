@@ -36,6 +36,9 @@ public class QrServiceImpl implements QrService {
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
 
+    @Value("${app.backend-url:http://localhost:8080/api}")
+    private String backendUrl;
+
     @Override
     @Transactional
     public QrOrderItemDto createQrOrderItem(Long orderItemId, String qrType, String content) {
@@ -167,24 +170,44 @@ public class QrServiceImpl implements QrService {
     public String getRedirectUrl(String qrCode) {
         // First try QrOrderItem
         QrOrderItem qrItem = qrOrderItemRepository.findByQrCode(qrCode).orElse(null);
-        if (qrItem != null && "LINK".equals(qrItem.getQrType()) && qrItem.getContent() != null) {
-            String url = qrItem.getContent();
-            if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                url = "https://" + url;
+        if (qrItem != null && qrItem.getContent() != null) {
+            if ("LINK".equals(qrItem.getQrType())) {
+                String url = qrItem.getContent();
+                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                    url = "https://" + url;
+                }
+                return url;
             }
-            return url;
+            if ("PHOTO".equals(qrItem.getQrType())) {
+                return resolveAbsoluteUrl(qrItem.getContent());
+            }
         }
         // Fallback to QrCode
         QrCode qrCodeEntity = qrCodeRepository.findByCode(qrCode).orElse(null);
-        if (qrCodeEntity != null && "LINK".equals(qrCodeEntity.getQrType()) && qrCodeEntity.getContent() != null) {
-            String url = qrCodeEntity.getContent();
-            if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                url = "https://" + url;
+        if (qrCodeEntity != null && "ASSIGNED".equals(qrCodeEntity.getStatus()) && qrCodeEntity.getContent() != null) {
+            if ("LINK".equals(qrCodeEntity.getQrType())) {
+                String url = qrCodeEntity.getContent();
+                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                    url = "https://" + url;
+                }
+                return url;
             }
-            return url;
+            if ("PHOTO".equals(qrCodeEntity.getQrType())) {
+                return resolveAbsoluteUrl(qrCodeEntity.getContent());
+            }
         }
-        // PHOTO, FREE, or not found: Angular page handles display/error
+        // FREE or not found: frontend page handles display/error
         return frontendUrl + "/qr/" + qrCode;
+    }
+
+    private String resolveAbsoluteUrl(String content) {
+        if (content.startsWith("http://") || content.startsWith("https://")) {
+            return content;
+        }
+        if (content.startsWith("/")) {
+            return backendUrl + content;
+        }
+        return backendUrl + "/" + content;
     }
 
     private QrCodeDto mapQrCodeToDto(QrCode entity) {
