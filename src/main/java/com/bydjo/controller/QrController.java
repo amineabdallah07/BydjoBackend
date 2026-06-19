@@ -3,6 +3,7 @@ package com.bydjo.controller;
 import com.bydjo.dtos.common.ApiResponse;
 import com.bydjo.dtos.qr.QrCodeDto;
 import com.bydjo.dtos.qr.QrOrderItemDto;
+import com.bydjo.security.UserPrincipal;
 import com.bydjo.service.FileStorageService;
 import com.bydjo.service.QrService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -53,7 +55,7 @@ public class QrController {
     @Operation(summary = "Get my QR t-shirts from delivered orders")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<QrOrderItemDto>>> getMyQrShirts(
-            @AuthenticationPrincipal com.bydjo.security.UserPrincipal user) {
+            @AuthenticationPrincipal UserPrincipal user) {
         return ResponseEntity.ok(qrService.getMyQrShirts(user.getId()));
     }
 
@@ -63,7 +65,7 @@ public class QrController {
     public ResponseEntity<ApiResponse<Void>> updateMyQrContent(
             @PathVariable String qrCode,
             @RequestBody Map<String, String> body,
-            @AuthenticationPrincipal com.bydjo.security.UserPrincipal user) {
+            @AuthenticationPrincipal UserPrincipal user) {
         String newContent = body.get("content");
         if (newContent == null || newContent.isBlank()) {
             return ResponseEntity.badRequest().body(ApiResponse.error("Content is required"));
