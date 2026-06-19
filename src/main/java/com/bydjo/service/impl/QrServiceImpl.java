@@ -19,7 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -241,15 +243,11 @@ public class QrServiceImpl implements QrService {
         QrOrderItem qrItem = qrOrderItemRepository.findByQrCodeAndUserId(qrCode, userId)
                 .orElseThrow(() -> new RuntimeException("QR code not found or not owned by user"));
         int total = qrScanRepository.countByQrCode(qrCode);
-        List<Object[]> rows = qrScanRepository.countByDay(qrCode);
-        List<Map<String, Object>> daily = rows.stream().map(row -> {
-            String date = (String) row[0];
-            int count = ((Number) row[1]).intValue();
-            return Map.<String, Object>of("date", date, "count", count);
-        }).collect(Collectors.toList());
+        LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
+        int today = qrScanRepository.countByQrCodeSince(qrCode, todayStart);
         return ApiResponse.success(Map.of(
                 "total", total,
-                "daily", daily
+                "today", today
         ));
     }
 

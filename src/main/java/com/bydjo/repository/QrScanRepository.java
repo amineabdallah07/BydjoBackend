@@ -6,15 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Repository
 public interface QrScanRepository extends JpaRepository<QrScan, Long> {
     int countByQrCode(String qrCode);
 
-    @Query(value = "SELECT TO_CHAR(DATE(s.scanned_at), 'YYYY-MM-DD') as scan_date, COUNT(*)::int as cnt " +
-           "FROM qr_scans s WHERE s.qr_code = :qrCode " +
-           "GROUP BY DATE(s.scanned_at) " +
-           "ORDER BY DATE(s.scanned_at) DESC", nativeQuery = true)
-    List<Object[]> countByDay(@Param("qrCode") String qrCode);
+    @Query("SELECT COUNT(s) FROM QrScan s WHERE s.qrCode = :qrCode AND s.scannedAt >= :since")
+    int countByQrCodeSince(@Param("qrCode") String qrCode, @Param("since") LocalDateTime since);
 }
