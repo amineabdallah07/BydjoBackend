@@ -29,30 +29,14 @@ ON CONFLICT DO NOTHING;
 -- Categories
 INSERT INTO categories (name, slug, description, active, sort_order) VALUES
 ('T-Shirts', 't-shirts', 'Premium t-shirts pour homme', TRUE, 1),
-('Jeans', 'jeans', 'Jeans de qualité supérieure', TRUE, 2),
-('Sneakers', 'sneakers', 'Sneakers tendance', TRUE, 3),
-('Caps', 'caps', 'Caps et casquettes stylées', TRUE, 4),
-('Vestes', 'vestes', 'Vestes et manteaux premium', TRUE, 5),
-('Shorts', 'shorts', 'Shorts confortables', TRUE, 6),
-('Accessoires', 'accessoires', 'Accessoires tendance', TRUE, 7)
+('Shorts', 'shorts', 'Shorts confortables', TRUE, 2)
 ON CONFLICT (name) DO NOTHING;
 
 -- Sample Products
 INSERT INTO products (name, slug, description, price, compare_at_price, category_id, active, is_featured, is_new, is_bestseller, brand, material, total_stock) VALUES
 ('Classic Oversized Tee', 'classic-oversized-tee', 'T-shirt oversize en coton premium, coupe droite et confortable.', 49.900, 65.000, 1, TRUE, TRUE, TRUE, FALSE, 'BY DJO', '100% Coton', 150),
 ('Streetwear Graphic Tee', 'streetwear-graphic-tee', 'T-shirt avec imprimé streetwear exclusif BY DJO.', 59.900, NULL, 1, TRUE, TRUE, TRUE, TRUE, 'BY DJO', '100% Coton', 100),
-('Premium Slim Jeans', 'premium-slim-jeans', 'Jean slim en denim premium avec finition tendance.', 119.000, 149.000, 2, TRUE, TRUE, FALSE, TRUE, 'BY DJO', 'Denim', 80),
-('Urban Cargo Pants', 'urban-cargo-pants', 'Pantalon cargo urbain avec poches latérales.', 99.000, NULL, 2, TRUE, TRUE, TRUE, FALSE, 'BY DJO', 'Coton', 60),
-('Air Runner Sneakers', 'air-runner-sneakers', 'Sneakers confortables au design moderne et épuré.', 189.000, 239.000, 3, TRUE, TRUE, FALSE, TRUE, 'BY DJO', 'Synthétique', 40),
-('Street Low Sneakers', 'street-low-sneakers', 'Sneakers basses lifestyle au style streetwear.', 159.000, NULL, 3, TRUE, FALSE, TRUE, FALSE, 'BY DJO', 'Cuir', 50),
-('Luxury Snapback Cap', 'luxury-snapback-cap', 'Casquette snapback premium avec broderie BY DJO.', 39.000, NULL, 4, TRUE, TRUE, FALSE, FALSE, 'BY DJO', 'Coton', 200),
-('Classic Dad Hat', 'classic-dad-hat', 'Casquette dad hat au style minimaliste.', 35.000, NULL, 4, TRUE, FALSE, TRUE, FALSE, 'BY DJO', 'Coton', 150),
-('Bomber Jacket Premium', 'bomber-jacket-premium', 'Veste bomber en matériau premium avec doublure chaude.', 249.000, 329.000, 5, TRUE, TRUE, TRUE, TRUE, 'BY DJO', 'Polyester', 30),
-('Varsity Jacket', 'varsity-jacket', 'Veste varsity classique revisité style streetwear.', 279.000, NULL, 5, TRUE, TRUE, FALSE, FALSE, 'BY DJO', 'Cuir/Mélange', 25),
-('Summer Cargo Shorts', 'summer-cargo-shorts', 'Short cargo léger parfait pour l''été.', 79.000, 99.000, 6, TRUE, FALSE, TRUE, FALSE, 'BY DJO', 'Coton', 100),
-('Premium Leather Belt', 'premium-leather-belt', 'Ceinture en cuir véritable avec boucle matte.', 59.000, NULL, 7, TRUE, TRUE, FALSE, FALSE, 'BY DJO', 'Cuir', 120),
-('Minimal Watch', 'minimal-watch', 'Montre minimaliste avec bracelet en acier.', 189.000, 249.000, 7, TRUE, TRUE, FALSE, TRUE, 'BY DJO', 'Acier', 40),
-('Streetwear Backpack', 'streetwear-backpack', 'Sac à dos streetwear avec compartiment laptop.', 129.000, NULL, 7, TRUE, FALSE, TRUE, FALSE, 'BY DJO', 'Polyester', 60);
+('Summer Cargo Shorts', 'summer-cargo-shorts', 'Short cargo léger parfait pour l''été.', 79.000, 99.000, 2, TRUE, FALSE, TRUE, FALSE, 'BY DJO', 'Coton', 100);
 
 -- Banners
 INSERT INTO banners (title, subtitle, image_url, link, button_text, active, sort_order) VALUES
