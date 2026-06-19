@@ -15,4 +15,17 @@ public interface QrOrderItemRepository extends JpaRepository<QrOrderItem, Long> 
 
     @Query("SELECT q FROM QrOrderItem q ORDER BY q.createdAt DESC")
     List<QrOrderItem> findAllByOrderByCreatedAtDesc();
+
+    @Query("SELECT q FROM QrOrderItem q " +
+           "JOIN OrderItem oi ON oi.id = q.orderItemId " +
+           "JOIN Order o ON o.id = oi.order.id " +
+           "WHERE o.user.id = :userId AND o.status = 'DELIVERED' " +
+           "ORDER BY q.createdAt DESC")
+    List<QrOrderItem> findByUserIdAndDeliveredOrder(@Param("userId") Long userId);
+
+    @Query("SELECT q FROM QrOrderItem q " +
+           "JOIN OrderItem oi ON oi.id = q.orderItemId " +
+           "JOIN Order o ON o.id = oi.order.id " +
+           "WHERE q.qrCode = :qrCode AND o.user.id = :userId")
+    Optional<QrOrderItem> findByQrCodeAndUserId(@Param("qrCode") String qrCode, @Param("userId") Long userId);
 }

@@ -195,6 +195,32 @@ public class QrServiceImpl implements QrService {
 
     @Override
     @Transactional(readOnly = true)
+    public ApiResponse<List<QrOrderItemDto>> getMyQrShirts(Long userId) {
+        List<QrOrderItem> items = qrOrderItemRepository.findByUserIdAndDeliveredOrder(userId);
+        List<QrOrderItemDto> dtos = items.stream()
+                .map(this::mapToFullDto)
+                .collect(Collectors.toList());
+        return ApiResponse.success(dtos);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<Void> updateMyQrContent(String qrCode, String newContent, Long userId) {
+        QrOrderItem qrItem = qrOrderItemRepository.findByQrCodeAndUserId(qrCode, userId)
+                .orElseThrow(() -> new RuntimeException("QR code not found or not owned by user"));
+        qrItem.setContent(newContent);
+        qrOrderItemRepository.save(qrItem);
+        QrCode qrCodeEntity = qrCodeRepository.findByCode(qrCode).orElse(null);
+        if (qrCodeEntity != null) {
+            qrCodeEntity.setContent(newContent);
+            qrCodeRepository.save(qrCodeEntity);
+        }
+        log.info("User {} updated QR {} content to {}", userId, qrCode, newContent);
+        return ApiResponse.success("Content updated");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public String getRedirectUrl(String qrCode) {
         // First try QrOrderItem
         QrOrderItem qrItem = qrOrderItemRepository.findByQrCode(qrCode).orElse(null);

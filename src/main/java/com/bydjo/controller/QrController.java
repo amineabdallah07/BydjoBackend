@@ -49,6 +49,28 @@ public class QrController {
         return ResponseEntity.ok(qrService.getQrContent(qrCode));
     }
 
+    @GetMapping("/my-tshirts")
+    @Operation(summary = "Get my QR t-shirts from delivered orders")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<QrOrderItemDto>>> getMyQrShirts(
+            @AuthenticationPrincipal com.bydjo.security.UserPrincipal user) {
+        return ResponseEntity.ok(qrService.getMyQrShirts(user.getId()));
+    }
+
+    @PutMapping("/my-tshirts/{qrCode}/content")
+    @Operation(summary = "Update my QR t-shirt content (link or photo URL)")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> updateMyQrContent(
+            @PathVariable String qrCode,
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal com.bydjo.security.UserPrincipal user) {
+        String newContent = body.get("content");
+        if (newContent == null || newContent.isBlank()) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("Content is required"));
+        }
+        return ResponseEntity.ok(qrService.updateMyQrContent(qrCode, newContent, user.getId()));
+    }
+
     @GetMapping("/orders")
     @Operation(summary = "Get all QR order items (Admin)")
     @PreAuthorize("hasRole('ADMIN')")

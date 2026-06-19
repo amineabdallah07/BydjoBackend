@@ -16,4 +16,6 @@ public interface QrService {
     ApiResponse<Map<String, Object>> getQrCodeStats();
     void deleteQrCode(Long id);
     String getRedirectUrl(String qrCode);
+    ApiResponse<List<QrOrderItemDto>> getMyQrShirts(Long userId);
+    ApiResponse<Void> updateMyQrContent(String qrCode, String newContent, Long userId);
 }
