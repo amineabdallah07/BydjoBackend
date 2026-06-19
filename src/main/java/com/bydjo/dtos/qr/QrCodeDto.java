@@ -23,4 +23,5 @@ public class QrCodeDto {
     private String qrType;
     private String content;
     private String size;
+    private Integer scanCount;
 }

@@ -48,4 +48,8 @@ public class QrCode {
 
     @Column(length = 10)
     private String size;
+
+    @Column(name = "scan_count", nullable = false)
+    @Builder.Default
+    private Integer scanCount = 0;
 }

@@ -7,9 +7,11 @@ import com.bydjo.entity.Order;
 import com.bydjo.entity.OrderItem;
 import com.bydjo.entity.QrCode;
 import com.bydjo.entity.QrOrderItem;
+import com.bydjo.entity.QrScan;
 import com.bydjo.repository.OrderItemRepository;
 import com.bydjo.repository.QrCodeRepository;
 import com.bydjo.repository.QrOrderItemRepository;
+import com.bydjo.repository.QrScanRepository;
 import com.bydjo.service.QrService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -32,6 +32,7 @@ public class QrServiceImpl implements QrService {
     private final QrOrderItemRepository qrOrderItemRepository;
     private final OrderItemRepository orderItemRepository;
     private final QrCodeRepository qrCodeRepository;
+    private final QrScanRepository qrScanRepository;
 
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
@@ -220,6 +221,39 @@ public class QrServiceImpl implements QrService {
     }
 
     @Override
+    @Transactional
+    public void registerScan(String qrCode, String ipAddress) {
+        QrScan scan = QrScan.builder()
+                .qrCode(qrCode)
+                .ipAddress(ipAddress)
+                .build();
+        qrScanRepository.save(scan);
+        qrCodeRepository.findByCode(qrCode).ifPresent(code -> {
+            code.setScanCount(code.getScanCount() != null ? code.getScanCount() + 1 : 1);
+            qrCodeRepository.save(code);
+        });
+        log.debug("Scan registered for QR code {} from IP {}", qrCode, ipAddress);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ApiResponse<Map<String, Object>> getQrScanStats(String qrCode, Long userId) {
+        QrOrderItem qrItem = qrOrderItemRepository.findByQrCodeAndUserId(qrCode, userId)
+                .orElseThrow(() -> new RuntimeException("QR code not found or not owned by user"));
+        int total = qrScanRepository.countByQrCode(qrCode);
+        List<Object[]> rows = qrScanRepository.countByDay(qrCode);
+        List<Map<String, Object>> daily = rows.stream().map(row -> {
+            String date = (String) row[0];
+            int count = ((Number) row[1]).intValue();
+            return Map.<String, Object>of("date", date, "count", count);
+        }).collect(Collectors.toList());
+        return ApiResponse.success(Map.of(
+                "total", total,
+                "daily", daily
+        ));
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public String getRedirectUrl(String qrCode) {
         // First try QrOrderItem
@@ -257,6 +291,7 @@ public class QrServiceImpl implements QrService {
                 .qrType(entity.getQrType())
                 .content(entity.getContent())
                 .size(entity.getSize())
+                .scanCount(entity.getScanCount())
                 .build();
     }
 

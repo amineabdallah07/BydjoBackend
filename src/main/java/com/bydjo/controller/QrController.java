@@ -8,6 +8,7 @@ import com.bydjo.service.FileStorageService;
 import com.bydjo.service.QrService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,7 +39,9 @@ public class QrController {
 
     @GetMapping("/r/{qrCode}")
     @Operation(summary = "Public redirect endpoint: 302 to customer link for LINK type, or to Angular for photo")
-    public ResponseEntity<Void> redirectQr(@PathVariable String qrCode) {
+    public ResponseEntity<Void> redirectQr(@PathVariable String qrCode, HttpServletRequest request) {
+        String ip = request.getRemoteAddr();
+        qrService.registerScan(qrCode, ip);
         String url = qrService.getRedirectUrl(qrCode);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location", url);
@@ -57,6 +60,15 @@ public class QrController {
     public ResponseEntity<ApiResponse<List<QrOrderItemDto>>> getMyQrShirts(
             @AuthenticationPrincipal UserPrincipal user) {
         return ResponseEntity.ok(qrService.getMyQrShirts(user.getId()));
+    }
+
+    @GetMapping("/my-tshirts/{qrCode}/scans")
+    @Operation(summary = "Get scan stats for one of my QR t-shirts (daily + total)")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getMyQrScanStats(
+            @PathVariable String qrCode,
+            @AuthenticationPrincipal UserPrincipal user) {
+        return ResponseEntity.ok(qrService.getQrScanStats(qrCode, user.getId()));
     }
 
     @PutMapping("/my-tshirts/{qrCode}/content")

@@ -18,4 +18,6 @@ public interface QrService {
     String getRedirectUrl(String qrCode);
     ApiResponse<List<QrOrderItemDto>> getMyQrShirts(Long userId);
     ApiResponse<Void> updateMyQrContent(String qrCode, String newContent, Long userId);
+    void registerScan(String qrCode, String ipAddress);
+    ApiResponse<Map<String, Object>> getQrScanStats(String qrCode, Long userId);
 }
